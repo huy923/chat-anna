@@ -1,0 +1,100 @@
+Xin chào mình tên là Anna, mình là AI được tạo ra bởi huy923 hiện tại mình chưa phải bản chính thức và nhiều sai sốt mong bạn bỏ qua bây giờ thì mình có thể giúp gì cho bạn.
+
+URL: https://wiki.archlinux.org/title/MediaWiki
+
+MediaWiki is a free and open source wiki software written in PHP, originally developed for Wikipedia. It also powers this wiki (see Special:Version and the GitHub repository).
+To run MediaWiki you need three things:
+To install MediaWiki on XAMPP, see mw:Manual:Installing MediaWiki on XAMPP
+The steps to achieve a working MediaWiki configuration involve editing the PHP settings and adding the MediaWiki configuration snippets.
+MediaWiki requires the iconv and the intl extensions, so you need to uncomment extension=iconv and extension=intl in /etc/php/php.ini.
+Optional dependencies:
+Enable the API for your DBMS:
+Second, tweak the session handling or you might get a fatal error (PHP Fatal error: session_start(): Failed to initialize storage module[...]) by finding the session.save_path path. A good choice can be /var/lib/php/sessions or /tmp/.
+You will need to create the directory if it does not exist and then restrict its permissions:
+If you use PHP's open_basedir and want to allow file uploads, you need to include /var/lib/mediawiki/ (mediawiki symlinks images/ to /var/lib/mediawiki/).
+Follow Apache HTTP Server#PHP.
+Copy /etc/webapps/mediawiki/apache.example.conf to /etc/httpd/conf/extra/mediawiki.conf and edit it as needed.
+Add the following line to /etc/httpd/conf/httpd.conf:
+Restart the httpd.service daemon.
+The factual accuracy of this article or section is disputed.
+To get MediaWiki working with Nginx, create the following file:
+Ensure that php-fpm is installed and php-fpm.service is started.
+Include a server directive, similar to this
+Finally, restart nginx.service and php-fpm.service daemons.
+You should have Lighttpd installed and configured. "mod_alias" and "mod_rewrite" in server.modules array of lighttpd is required. Append to the lighttpd configuration file the following lines
+Restart the lighttpd.service daemon.
+Set up a database server as explained in the article of your DBMS: MariaDB, PostgreSQL, SQLite or MySQL.
+If you have set a non-empty root password for the database server, MediaWiki can automatically create the database during the next step. (See MariaDB#Reset the root password for how to set this password retrospectively for MariaDB.)  Otherwise the database needs to be created manually - see upstream instructions.
+Open the wiki URL (usually http://your_server/mediawiki/index.php) in a browser and do the initial configuration. Follow upstream instructions.
+The generated LocalSettings.php file is offered for download, save it to /etc/webapps/mediawiki/LocalSettings.php.
+Since 1.38.0 it has a symbolic link included in /usr/share/webapps/mediawiki/LocalSettings.php.
+This file defines the specific settings of your wiki. Whenever you upgrade the mediawiki package, it will not be replaced.
+Use PluggableAuth and LDAP Stack. Pay attention to "Compatibility Matrix" section. Currently LDAP works only with PluggableAuth-5.7.
+You need to install and add to config ldap stack extensions and PluggableAuth:
+Then set up at least 3 variables:
+Do not forget to run php maintenance/update.php after configuration.
+See mw:Manual:Upgrading, and do not forget to run:
+Check that PHP, Apache HTTP Server and MariaDB all use UTF-8. Otherwise you may face strange bugs because of encoding mismatch.
+The VisualEditor MediaWiki extension provides a rich-text editor for MediaWiki. Follow mw:Extension:VisualEditor to install it.
+URL: https://wiki.archlinux.org/title/Partitioning_(Portugu%C3%AAs)
+
+Artigos relacionados
+Da Wikipédia:
+Um disco inteiro pode ser alocado para uma única partição ou múltiplas para casos como "dual-boot", manutenção de uma partição swap ou para separar logicamente dados, como arquivos de áudio e vídeo. O esquema de particionamento é armazenado em uma tabela de partição como Master Boot Record (MBR) ou GUID Partition Table (GPT).
+As tabelas de partição são criadas e modificadas usando uma das muitas ferramentas de particionamento. As ferramentas disponíveis para Arch Linux estão listadas na seção #Ferramentas de particionamento.
+As partições geralmente contêm um sistema de arquivos diretamente, o que é realizado criando um sistema de arquivos (também conhecido como formatação) na partição. Alternativamente, as partições podem conter LVM, encriptação de dispositivo de bloco ou RAID, que em última análise fornecem arquivos de dispositivo nos quais um sistema de arquivos pode ser colocado (ou os dispositivos podem ser empilhados ainda mais).
+Qualquer dispositivo de bloco (por exemplo, disco, partição, dispositivo LUKS, volume lógico LVM ou matriz RAID) que contém diretamente um sistema de arquivos montável é chamado de volume.
+Há dois principais tipos de tabelas de partição disponíveis. Eles são descritos abaixo nas seções #Master Boot Record (MBR) e #Tabela de Partição GUID (GPT) juntos com uma discussão sobre como escolher um deles. Uma terceira alternativa, a menos comum, é usar um disco sem nenhuma partição, a qual também está discutida.
+Use uma ferramenta de particionamento para visualizar a tabela de partição de um dispositivo de bloco.
+O Master Boot Record (MBR) são os primeiros 512 bytes de um dispositivo de armazenamento. Contém um gerenciador de boot de sistema operacional e a tabela de partições do dispositivo de armazenamento. Desempenha um papel fundamental no processo de inicialização em sistemas BIOS. Veja Wikipedia:pt:Master boot record#Estrutura para conhecer a estrutura do MBR.
+Os primeiros 440 bytes do MBR são a área do código de inicialização. Em sistemas BIOS, ela usualmente contém o primeiro estágio do carregador de inicialização. Este código pode ser armazenado em backup, restaurado ou apagado usando dd.
+Na tabela de partição MBR (também conhecida como tabela de partição MS-DOS) há três tipos de partições:
+Partições primárias podem ser inicializadas e são limitadas a quatro por disco ou volume RAID. Se a tabela de partição MBR requerer mais do que quatro partições, então uma das partições primárias deve ser substituída por uma partição estendida contendo uma unidade lógica ou mais dentro dela.
+Partições estendidas podem ser pensadas como contêineres para unidades lógicas. Um disco rígido não pode conter mais do que uma partição estendida. A partição estendida também é contada como uma partição primária, então se um disco possuir uma partição estendida, somente outras três partições primárias serão possíveis (isto é, três partições primárias e uma partição estendida). O número de unidades lógicas residentes dentro de uma partição estendida é ilimitado. Um sistema executado em dual-boot com Windows irá necessitar que o Windows esteja dentro de uma partição primária.
+Um esquema bem comum é criar partições primárias de sda1 até sda3 seguidas por uma partição estendida sda4. As unidades lógicas em sda4 são numeradas como sda5, sda6, etc.
+Tabela de Partição GUID (GPT) é um esquema de particionamento que é parte da especificação Unified Extensible Firmware Interface; utiliza Identificadores Únicos Globalis (GUIDs), ou UUIDs no universo Linux, para definir partições e tipos de partição. Foi desenvolvido para suceder o esquema de particionamento Master Boot Record.
+No início de uma tabela de partição GPT no disco, há um Master Boot record protetivo (PMBR) que protege a GPT de softwares maliciosos. Este MBR protetivo, assim como um MBR comum, possui uma área de código de inicialização a qual pode ser usada para inicializar sistemas usando esquemas BIOS/GPT em bootloaders que suportarem.
+Tabela de Partição GUID (GPT) é uma alternativa moderna de método de particionamento criada para substituir o antigo Master Boot Record (MBR). GPT possui algumas vantagens sobre o MBR, o qual data de tempos do MS-DOS. Com os recentes desenvolvimentos de ferramentas de formatação, é fácil obter performance e confiabilidade iguais tanto para GPT como para MBR.
+Alguns pontos a serem considerar na escolha:
+Algumas vantagens do GPT sobre o MBR são:
+A seção de #Ferramentas de particionamento contém uma tabela indicando quais ferramentas estão disponíveis para criar e modificar tabelas GPT e MBR.
+This article or section needs expansion.
+Um disco sem partição, também conhecido como superfloppy refere-se a um dispositivo de armazenamento sem uma tabela de partição, tendo um sistema de arquivos ocupando o dispositivo de armazenamento inteiro. O setor de boot presente em um disco sem partição é chamado de volume boot record (VBR).
+Btrfs pode ocupar um dispositivo de armazenamento inteiro e substituir os esquemas de particionamento MBR ou GPT. Veja as instruções em Btrfs (Português)#Sistema de arquivos em um único dispositivo para detalhes.
+This article or section needs expansion.
+Não há regras estritas para particionar um disco rígido, embora o guia geral a seguir possa ser seguido. Um esquema de particionamento de disco é determinado por vários razões como flexibilidade desejada, velocidade, segurança, bem como limitações impostas pelo espaço em disco disponível. É essencialmente uma preferência pessoal. Se pretende fazer dual-boot com Arch Linux e um sistema operacional Windows, veja Dual boot com Windows.
+Este esquema é o mais simples, mais flexível e deve ser suficiente para a maioria dos casos considerando o aumento no tamanho de armazenamento de dispositivos comuns de usuários. Um arquivo swap pode ser criado e facilmente redimensionado conforme necessário. Isto usualmente faz sentido de ser feito considerando uma partição / simples e posteriormente se desejar separar outras em casos específicos como RAID, encriptação, uma partição de mídia compartilhada, etc. Veja #Partições discretas para uma descrição de algumas partições dedicadas comuns até incomuns.
+Uma partição GPT deve ter o tipo GUID BC13C2FF-59E6-4262-A352-B275FD6F7172 ("Linux root (x86-64)", "Linux x86-64 root (/)"). Uma partição MBR deve ter o ID de tipo "Linux" padrão 83.
+Separar um diretório como uma partição permite selecionar diferentes sistemas de arquivos e opções de montagem. Em casos como o de partições de mídia, elas também podem ser compartilhados entre sistemas operacionais.
+A seguir, há alguns exemplos de esquemas que podem ser usados ao fazer um particionamento, e as subseções seguintes detalham um pouco diretórios os quais podem ter sua própria partição separada e seu ponto de montagem relativo a /. Veja file-hierarchy(7) para uma descrição completa do conteúdo destes diretórios.
+O diretório raiz é o topo da hierarquia, o ponto onde o principal sistema de arquivos é montado e de cada outro sistema de arquivos reside. Todos os arquivos e diretórios aparecem sob o diretório raiz /, mesmo se estiverem armazenados em outros dispositivos físicos. O conteúdo do sistema de arquivos raiz deve ser adequado para inicializar, restaurar, recuperar e/ou reparar o sistema. Portanto, alguns diretórios sob / não são candidatos para partições separadas.
+A partição / ou partição raiz é necessária e também a mais importante. As demais partições podem ser substituídas por ela.
+/ tradicionalmente contém o diretório /usr, o qual pode crescer significativamente à medida em que novo software for instalado. 15–20 GiB devem ser suficientes para a maioria dos usuários com modernos discos rígidos. Se planejar armazenar um arquivo de swap aqui, precisará de um tamanho de partição maior.
+Uma partição GPT deve ter o tipo GUID BC13C2FF-59E6-4262-A352-B275FD6F7172 ("Linux root (x86-64)", "Linux x86-64 root (/)"). Uma partição MBR deve ter o ID de tipo "Linux" padrão 83.
+
+O diretório /boot contém as imagens vmlinuz e initramfs, bem como o arquivo de configuração do gerenciador de boot e seus estágios. Também armazena os dados que são usados antes mesmo de o kernel começar a executar programas no espaço de usuário. /boot não é necessário na execução normal do sistema, apenas durante o processo de inicialização e durante atualização do kernel (quando as imagens do ramdisk precisam ser recriadas).
+Consulte Processo de inicialização do Arch#Gerenciador de boot para obter mais informações sobre os requisitos e recursos do gerenciador de boot.
+Ao usar uma partição de sistema EFI como /boot, os requisitos são descritos no artigo partição de sistema EFI — o tamanho mínimo recomendado é 300 MiB e o tipo de partição correto deve ser definido.
+Em outros casos, o tamanho sugerido da partição /boot é de pelo menos 200 MiB e é recomendado definir o tipo de partição como Extended Boot Loader (XBOOTLDR) Partition que é o tipo de partição GPT GUID BC13C2FF-59E6-4262-A352-B275FD6F7172 (tipo ea00 para gdisk) ou tipo de partição MBR de ID ea.
+O diretório /home contém arquivos de configuração, caches, dados de aplicativos e arquivos de mídia específicos do usuário.
+Separar /home permite que / seja reparticionada separadamente, mas note que será possível reinstalar Arch com /home intocada mesmo se não estiver separada - basta que os diretórios de outros níveis sejam removidos, e então pacstrap poderá ser executado.
+Não se deve compartilhar diretórios de usuários entre diferentes distribuições, porque elas usam versões de software incompatíveis entre si. Invés disso, considere compartilhar uma partição de mídia ou ao menos usar diferentes diretórios dentro da partição /home. O tamanho desta partição varia.
+Uma partição GPT deve ter o tipo GUID 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 ("Linux home", "Linux /home"). Uma partição MBR deve ter o tipo "Linux" padrão de ID 83.
+Um swap é um arquivo ou partição que fornece espaço em disco usado como memória virtual. Arquivos swap e partições swap têm o mesmo desempenho, mas os arquivos de troca são muito mais fáceis de redimensionar conforme necessário. Uma partição swap pode potencialmente ser compartilhada entre sistemas operacionais, mas não se a hibernação for usada.
+Historicamente, a regra geral para o tamanho da partição swap era alocar o dobro da quantidade de RAM física. Como os computadores ganharam capacidades de memória cada vez maiores, esta regra está desatualizada. Por exemplo, em máquinas desktop médias com até 512 MiB de RAM, a regra 2× geralmente é adequada; se uma quantidade suficiente de RAM (mais de 1024 MiB) estiver disponível, pode ser possível ter uma partição swap menor.
+Para usar a hibernação (também conhecida como suspensão para o disco), é aconselhável criar a partição swap no tamanho da RAM. Embora o kernel tente compactar a imagem suspensa em disco para caber no espaço swap, não há garantia de que terá sucesso se o espaço swap usado for significativamente menor que a RAM. Consulte Gestão de energia/Suspender e hibernar#Hibernação para obter mais informações.
+Uma partição GPT deve ter o tipo GUID 0657FD6D-A4AB-43C4-84E5-0933C84B4F4 ("Linux swap"). Uma partição MBR deve ter o tipo de ID 82 ("Linux swap").
+Pode-se considerar montar uma partição "data" para armazenar diversos dados compartilhados entre usuários. Usar a partição /home para este propósito também é válido. O tamanho desta partição pode variar.
+Uma partição GPT deve ter o tipo "Linux filesystem" com GUID 0FC63DAF-8483-4772-8E79-3D69D8477DE4. Uma partição MBR deve ter o tipo "Linux" padrão de ID 83.
+O diretório /var armazena dados variáveis, como diretórios e arquivos de spool, dados administrativos e de registro, cache do pacman, etc. É usada, por exemplo, para cache e registro, e portanto é frequentemente alvo de operações de leitura e escrita. Mantê-lo em uma partição separada evita ficar sem espaço em disco devido a logs incorretos, etc.
+Ele existe para possibilitar a montagem de /usr como somente leitura. Tudo o que historicamente entrou em /usr e foi gravado durante a operação do sistema (em oposição à instalação e manutenção do software) deve residir em /var.
+/var conterá, entre outros dados, o cache do pacman. Manter esses pacotes é útil caso uma atualização de pacote cause instabilidade, exigindo um downgrade para um pacote arquivado mais antigo. O cache do pacman crescerá à medida que o sistema for expandido e atualizado, mas pode ser limpado com segurança se o espaço se tornar um problema.
+8–12 GiB em um sistema desktop devem ser suficientes para /var, dependendo de quanto software será instalado. Para usuários de NVIDIA, Wayland e GDM, considere adicionar a este tamanho de partição como para ter espaço livre suficiente para caber toda a sua memória de vídeo.
+Uma partição GPT deve ter o GUID de tipo 4D21B016-B534-45C2-A9FB-5C16E091FD2D ("Linux variable data", "Linux /var"). Uma partição MBR deve ter o tipo "Linux" padrão de ID 83.
+This article or section needs expansion.
+Os exemplos a seguir usam /dev/sda como exemplo de disco com /dev/sda1 como sua primeira partição. O esquema de nomeamento do dispositivo de bloco poderá ser diferente se estiver particionando um disco NVMe (por exemplo, /dev/nvme0n1 com partições iniciando em /dev/nvme0n1p1), um catão SD ou disco eMMC (por exemplo /dev/mmcblk0 com partições começando em /dev/mmcblk0p1). Veja Arquivo de dispositivo#Nomes de dispositivos de bloco para mais informações.
+Os programas a seguir são usados para criar e/ou manipular tabelas de partições de dispositivos e partições. Veja os artigos nos links para os comandos exatos a serem usados.
+Esta tabela irá ser útil para escolher o utilitário de sua necessidade:
+A regra geral é alinhar o início e o tamanho de uma partição em mebibytes. Consulte Advanced Format#Partition alignment.
+A opção CONFIG_EFI_PARTITION na configuração do kernel ativa o suporte a GPT (apesar do nome, EFI PARTITION, que se parece com partição de sistema EFI em inglês). Esta opção deve ser compilada no kernel e não compilada como um módulo carregável. É necessária mesmo em discos GPT que são utilizados para armazenamento de dados e não para inicialização do sistema. É ativada por padrão em todos kernel oficialmente suportados pelo Arch. No caso de um kernel personalizado, ative esta opção com o parâmetro CONFIG_EFI_PARTITION=y.
+Alguns sistemas baseados em BIOS antigos (produzidos antes de 2010) tentam processar o setor de inicialização e recusam-no se ele não contiver uma partição inicializável MBR. Isto é um problema se for necessário usar GPT neste disco, porque do ponto de vista do BIOS, ele contém somente uma partição MBR não inicializável do tipo ee (isto é, uma partição MBR protetiva). É possível marcar a partição protetiva MBR como inicializável usando fdisk -t mbr /dev/sda, e isto irá funcionar em alguns sitemas BIOS. Entretanto, a especificação UEFI proíbe a partição protetiva MBR de ser inicializável, e sistemas baseados em UEFI irão interferir nisso, mesmo quando configuradas no modo legado de inicialização. Então, isso importa caso deseje criar um flash drive USB baseado em GPT que deveria inicializar tanto em sistemas UEFI como sistemas BIOS antigos que insistem em procurar uma partição MBR inicializável. Não é possível solucionar este problema usando ferramentas como fdisk ou gdisk, mas é possível criar uma partição MBR falsa com uma adequada entrada para ambos os tipos de BIOS manualmente, com uma sequência correta de bytes.
