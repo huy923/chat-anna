@@ -1,3 +1,4 @@
 data/
 checkdata.txt
 *.txt
+__pycache__/
