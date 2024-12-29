@@ -11,9 +11,8 @@ from tokenizers.models import BPE
 from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import Whitespace
 from tokenizers.processors import TemplateProcessing
-
-from transformers import PreTrainedTokenizerFast  # <---- Add this line.
-
+import os, glob
+from transformers import PreTrainedTokenizerFast  
 
 
 trainer = BpeTrainer(special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"])
@@ -21,9 +20,12 @@ trainer = BpeTrainer(special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]
 tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
 tokenizer.pre_tokenizer = Whitespace()
 
-files = ["archwiki_pages.txt"]  # e.g. training with https://norvig.com/big.txt
+os.chdir("./data")
+files = []  # e.g. training with https://norvig.com/big.txt
+for file in glob.glob("*.txt"):
+    files.append(file)
+    
 tokenizer.train(files, trainer)
-
 tokenizer.post_processor = TemplateProcessing(
     single="[CLS] $A [SEP]",
     pair="[CLS] $A [SEP] $B:1 [SEP]:1",

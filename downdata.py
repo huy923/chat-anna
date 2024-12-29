@@ -21,7 +21,7 @@ while count > 0:
             # content_p = content_divs.find_all('p')
             if content_divs:
                 text_content = "\n".join([p.get_text().strip() for p in content_divs])
-                with open("archwiki_pages.txt", "a", encoding="utf-8") as file:
+                with open("./data/archwiki_pages.txt", "a", encoding="utf-8") as file:
                     file.write(text_content)
             count -= 1 
 
