@@ -2,3 +2,4 @@ data/
 checkdata.txt
 *.txt
 __pycache__/
+*.gguf

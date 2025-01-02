@@ -1,6 +1,5 @@
 import json
 
-# Thông số cho mô hình của bạn
 config = {
     "_name_or_path": "MyCustomModel/V1.0",
     "architectures": ["LlamaForCausalLM"],

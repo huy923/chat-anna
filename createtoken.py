@@ -12,31 +12,41 @@ from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import Whitespace
 from tokenizers.processors import TemplateProcessing
 import os, glob
-from transformers import PreTrainedTokenizerFast  
-
-
-trainer = BpeTrainer(special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"])
+from transformers import PreTrainedTokenizerFast
 
 tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
 tokenizer.pre_tokenizer = Whitespace()
 
+# special_tokens = ["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"]
+special_tokens = ["<unk>", "<s>", "</s>", "<|im_start|>", "<|im_end|>"]
+tokenizer.add_special_tokens(special_tokens)
+
+trainer = BpeTrainer(special_tokens=special_tokens)
 os.chdir("./data")
-files = []  # e.g. training with https://norvig.com/big.txt
-for file in glob.glob("*.txt"):
-    files.append(file)
-    
+files = [file for file in glob.glob("*.txt")]  
+if not files:
+    raise FileNotFoundError("No .txt files found in the ./data directory.")
+
 tokenizer.train(files, trainer)
+
 tokenizer.post_processor = TemplateProcessing(
-    single="[CLS] $A [SEP]",
-    pair="[CLS] $A [SEP] $B:1 [SEP]:1",
+    single="<s> $A </s>",
+    pair="<s> $A </s> $B:1 </s>:1",
     special_tokens=[
-        ("[CLS]", tokenizer.token_to_id("[CLS]")),
-        ("[SEP]", tokenizer.token_to_id("[SEP]")),
+        ("<s>", tokenizer.token_to_id("<s>")),
+        ("</s>", tokenizer.token_to_id("</s>")),
     ],
 )
 
-awesome_tokenizer = PreTrainedTokenizerFast(tokenizer_object=tokenizer)
+awesome_tokenizer = PreTrainedTokenizerFast(
+    tokenizer_object=tokenizer,
+    bos_token="<s>",
+    eos_token="</s>",
+    pad_token="<|im_start|>",
+    mask_token="<|im_end|>",
+)
 awesome_tokenizer.save_pretrained("awesome_tokenizer")
+
 # awesome_tokenizer.from_pretrained('./awesome_tokenizer/')
 
 
