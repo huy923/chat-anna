@@ -26,7 +26,6 @@ config = {
     "vocab_size": 32003
 }
 
-# Lưu tệp config.json
 with open("config.json", "w") as f:
     json.dump(config, f, indent=4)
 

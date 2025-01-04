@@ -14,7 +14,7 @@ from tokenizers.processors import TemplateProcessing
 import os, glob
 from transformers import PreTrainedTokenizerFast
 
-tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
+tokenizer = Tokenizer(BPE(unk_token="<unk>"))
 tokenizer.pre_tokenizer = Whitespace()
 
 # special_tokens = ["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"]
@@ -44,6 +44,7 @@ awesome_tokenizer = PreTrainedTokenizerFast(
     eos_token="</s>",
     pad_token="<|im_start|>",
     mask_token="<|im_end|>",
+    
 )
 awesome_tokenizer.save_pretrained("awesome_tokenizer")
 
